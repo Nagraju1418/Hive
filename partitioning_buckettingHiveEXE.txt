@@ -1,0 +1,404 @@
+[training@localhost ~]$ hive
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+Hive history file=/tmp/training/hive_job_log_training_202302150448_1126293378.txt
+hive> create table states(state string, city string, pop bigint)
+    > row format delimited     
+    > fields terminated by ',';
+OK
+Time taken: 3.781 seconds
+hive> load data local inpath '/home/training/Desktop/HivePartitioning.txt' into table states;
+Copying data from file:/home/training/Desktop/HivePartitioning.txt
+Copying file: file:/home/training/Desktop/HivePartitioning.txt
+Loading data to table default.states
+OK
+Time taken: 0.553 seconds
+hive> describe states;
+OK
+state	string	
+city	string	
+pop	bigint	
+Time taken: 0.207 seconds
+hive> create table part(city string, pop bigint)
+    > partitioned by (state string);
+OK
+Time taken: 0.057 seconds
+hive> set hive.exec.dynamic.partition.mode=nonstrict;
+hive> insert overwrite table part partition(state)
+    > select city, pop, state from states;
+Total MapReduce jobs = 2
+Launching Job 1 out of 2
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_202302150438_0001, Tracking URL = http://0.0.0.0:50030/jobdetails.jsp?jobid=job_202302150438_0001
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -Dmapred.job.tracker=0.0.0.0:8021 -kill job_202302150438_0001
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0
+2023-02-15 04:53:35,336 Stage-1 map = 0%,  reduce = 0%
+2023-02-15 04:53:38,399 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.2 sec
+2023-02-15 04:53:39,420 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.2 sec
+2023-02-15 04:53:40,448 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.2 sec
+2023-02-15 04:53:41,477 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 1.2 sec
+MapReduce Total cumulative CPU time: 1 seconds 200 msec
+Ended Job = job_202302150438_0001
+Ended Job = 1134097751, job is filtered out (removed at runtime).
+Moving data to: hdfs://0.0.0.0:8020/tmp/hive-training/hive_2023-02-15_04-53-28_974_5445822580328619894/-ext-10000
+Loading data to table default.part partition (state=null)
+	Loading partition {state=Georgia}
+	Loading partition {state=Alaska}
+	Loading partition {state=Alabama}
+	Loading partition {state=__HIVE_DEFAULT_PARTITION__}
+	Loading partition {state=California}
+	Loading partition {state=Florida}
+16 Rows loaded to part
+MapReduce Jobs Launched: 
+Job 0: Map: 1   Cumulative CPU: 1.2 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 1 seconds 200 msec
+OK
+Time taken: 14.398 seconds
+hive>       
+    > 
+    > 
+    > 
+    > [training@localhost ~]$ hive
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+Hive history file=/tmp/training/hive_job_log_training_202302150503_237186329.txt
+hive> create table bucket(id int, name string, sal float)
+    > row format delimited
+    > fields separated by ',';
+FAILED: ParseException line 1:13 mismatched input 'bucket' expecting Identifier near 'table' in table name
+
+hive> create table bucket1(id int, name string, sal float)
+    > row format delimited
+    > fields separated by ',';
+FAILED: ParseException line 3:7 mismatched input 'separated' expecting TERMINATED near 'fields' in table row format's field separator
+
+hive> create table tab12(id int, name string, sal float)  
+    > row format delimited
+    > row format delimited  
+    > [training@localhost ~]$ hive
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+Hive history file=/tmp/training/hive_job_log_training_202302150506_1008254745.txt
+hive> create table bucket(id int, name string, sal float)
+    > row format delimited
+    > fields terminated by ',';
+FAILED: ParseException line 1:13 mismatched input 'bucket' expecting Identifier near 'table' in table name
+
+hive> create table tab12(id int, name string, sal float) 
+    > row format delimited                              
+    > fields terminated by ',';                         
+OK
+Time taken: 3.495 seconds
+ file:/home/training/Desktop/HiveBucketting.txt
+hive> load data local inpath '/home/training/HiveBucketting.txt' into table tab12;        
+Copying data from file:/home/training/HiveBucketting.txt
+Copying file: file:/home/training/HiveBucketting.txt
+Loading data to table default.tab12
+OK
+Time taken: 0.569 seconds
+hive> select * from tab12;
+OK
+1	a	222.3
+2	b	333.1
+3	c	444.1
+4	d	555.5
+5	e	666.3
+6	f	777.2
+Time taken: 0.321 seconds
+hive> set hive.enforce.bucketting=true;
+hive> create tab12_bucket(id int, name string, sal float)
+    > clustered by (id) into 3 buckets
+    > row format delimited
+    > fields separated by ',';
+FAILED: ParseException line 1:7 Failed to recognize predicate 'tab12_bucket'. Failed rule: 'kwRole' in create role
+
+hive> create table tab12_bucket(id int, name string, sal float)
+    > clustered by (id) into 3 buckets                         
+    > row format delimited                                     
+    > fields separated by ',';                                 
+FAILED: ParseException line 4:7 mismatched input 'separated' expecting TERMINATED near 'fields' in table row format's field separator
+
+hive> create table tab12_bucket(id int, name string, sal float)
+    > clustered by (id) into 3 buckets                         
+    > row format delimited                                     
+    > fields terminated by ',';                                
+OK
+Time taken: 0.061 seconds
+hive>select * from tab12_bucket;
+OK
+Time taken: 0.108 seconds
+hive> describe tab12_bucket;
+OK
+id	int	
+name	string	
+sal	float	
+Time taken: 0.143 seconds
+hive> select * from tab12_bucket;
+OK
+Time taken: 0.123 seconds
+hive> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[training@localhost ~]$ hadoop fs -ls /user/hive/warehouse/part
+Found 6 items
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:53 /user/hive/warehouse/part/state=Alabama
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:53 /user/hive/warehouse/part/state=Alaska
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:53 /user/hive/warehouse/part/state=California
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:53 /user/hive/warehouse/part/state=Florida
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:53 /user/hive/warehouse/part/state=Georgia
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:53 /user/hive/warehouse/part/state=__HIVE_DEFAULT_PARTITION__
+[training@localhost ~]$ hadoop fs -ls /user/hive/warehouse/part/state=Florida
+Found 1 items
+-rw-r--r--   1 training supergroup         15 2023-02-15 04:53 /user/hive/warehouse/part/state=Florida/000000_0
+[training@localhost ~]$ hadoop fs -ls /user/hive/warehouse/part/state=Florida/000000_0
+Found 1 items
+-rw-r--r--   1 training supergroup         15 2023-02-15 04:53 /user/hive/warehouse/part/state=Florida/000000_0
+[training@localhost ~]$ hadoop fs -cat /user/hive/warehouse/part/state=Florida/000000_0
+L12
+M13
+N14
+[training@localhost ~]$ 
+[training@localhost ~]$ 
+[training@localhost ~]$ 
+[training@localhost ~]$ 
+[training@localhost ~]$ hadoop fs -ls /user/hive/warehouse/tab12_bucket
+[training@localhost ~]$ hadoop fs -ls /user/hive/warehouse/tab12_bucket
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[training@localhost ~]$ hive
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+Hive history file=/tmp/training/hive_job_log_training_202302150727_954499329.txt
+hive> show databases;
+OK
+default
+userdb
+Time taken: 3.219 seconds
+hive> use default
+    > ;
+OK
+Time taken: 0.022 seconds
+hive> show tables;
+OK
+movies_part
+part
+states
+tab12
+tab12_bucket
+userratings
+Time taken: 0.198 seconds
+hive> select count(*) from userratings;
+Total MapReduce jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_202302150438_0002, Tracking URL = http://0.0.0.0:50030/jobdetails.jsp?jobid=job_202302150438_0002
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -Dmapred.job.tracker=0.0.0.0:8021 -kill job_202302150438_0002
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2023-02-15 07:27:56,557 Stage-1 map = 0%,  reduce = 0%
+2023-02-15 07:28:00,619 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.89 sec
+2023-02-15 07:28:01,640 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.89 sec
+2023-02-15 07:28:02,654 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.89 sec
+2023-02-15 07:28:03,669 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.89 sec
+2023-02-15 07:28:04,684 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.58 sec
+2023-02-15 07:28:05,700 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.58 sec
+2023-02-15 07:28:06,721 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.58 sec
+2023-02-15 07:28:07,742 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.58 sec
+MapReduce Total cumulative CPU time: 4 seconds 580 msec
+Ended Job = job_202302150438_0002
+MapReduce Jobs Launched: 
+Job 0: Map: 1  Reduce: 1   Cumulative CPU: 4.58 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 4 seconds 580 msec
+OK
+100000
+Time taken: 18.793 seconds
+hive> create table rating_buckets(userid, movieid int, rating int, unixtime int)
+    > clustered by (moovieid) into 8 buckets;
+FAILED: ParseException line 1:34 cannot recognize input near ',' 'movieid' 'int' in column type
+
+hive> create table rating_buckets(userid, movieid int, rating int, unixtime bigint)
+    > clustered by (moovieid) into 8 buckets;                                      
+FAILED: ParseException line 1:34 cannot recognize input near ',' 'movieid' 'int' in column type
+
+hive> create table rating_buckets(userid int, movieid int, rating int, unixtime bigint)
+    > clustered by (moovieid) into 8 buckets;                                          
+FAILED: SemanticException [Error 10002]: Invalid column reference
+hive> create table rating_buckets(userid int, movieid int, rating int, unixtime bigint)
+    > clustered by (movieid) into 8 buckets;                                           
+OK
+Time taken: 0.146 seconds
+hive> set hive.enforce.bucketing = true;
+hive> insert overwrite table rating_buckets select * from userratings cluster by movieid;
+Total MapReduce jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 8
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_202302150438_0003, Tracking URL = http://0.0.0.0:50030/jobdetails.jsp?jobid=job_202302150438_0003
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -Dmapred.job.tracker=0.0.0.0:8021 -kill job_202302150438_0003
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 8
+2023-02-15 07:34:52,067 Stage-1 map = 0%,  reduce = 0%
+2023-02-15 07:34:56,105 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.95 sec
+2023-02-15 07:34:57,123 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.95 sec
+2023-02-15 07:34:58,140 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.95 sec
+2023-02-15 07:34:59,153 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.95 sec
+2023-02-15 07:35:00,170 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.95 sec
+2023-02-15 07:35:01,184 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.95 sec
+2023-02-15 07:35:02,200 Stage-1 map = 100%,  reduce = 25%, Cumulative CPU 11.26 sec
+2023-02-15 07:35:03,219 Stage-1 map = 100%,  reduce = 25%, Cumulative CPU 11.26 sec
+2023-02-15 07:35:04,235 Stage-1 map = 100%,  reduce = 25%, Cumulative CPU 11.26 sec
+2023-02-15 07:35:05,253 Stage-1 map = 100%,  reduce = 25%, Cumulative CPU 11.26 sec
+2023-02-15 07:35:06,268 Stage-1 map = 100%,  reduce = 25%, Cumulative CPU 11.26 sec
+2023-02-15 07:35:07,282 Stage-1 map = 100%,  reduce = 38%, Cumulative CPU 15.46 sec
+2023-02-15 07:35:08,296 Stage-1 map = 100%,  reduce = 50%, Cumulative CPU 19.7 sec
+2023-02-15 07:35:09,313 Stage-1 map = 100%,  reduce = 50%, Cumulative CPU 19.7 sec
+2023-02-15 07:35:10,326 Stage-1 map = 100%,  reduce = 50%, Cumulative CPU 19.7 sec
+2023-02-15 07:35:11,346 Stage-1 map = 100%,  reduce = 50%, Cumulative CPU 19.7 sec
+2023-02-15 07:35:12,364 Stage-1 map = 100%,  reduce = 50%, Cumulative CPU 19.7 sec
+2023-02-15 07:35:13,385 Stage-1 map = 100%,  reduce = 75%, Cumulative CPU 28.01 sec
+2023-02-15 07:35:14,403 Stage-1 map = 100%,  reduce = 75%, Cumulative CPU 28.01 sec
+2023-02-15 07:35:15,415 Stage-1 map = 100%,  reduce = 75%, Cumulative CPU 28.01 sec
+2023-02-15 07:35:16,428 Stage-1 map = 100%,  reduce = 75%, Cumulative CPU 28.01 sec
+2023-02-15 07:35:17,444 Stage-1 map = 100%,  reduce = 75%, Cumulative CPU 28.01 sec
+2023-02-15 07:35:18,458 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 36.48 sec
+2023-02-15 07:35:19,474 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 36.48 sec
+2023-02-15 07:35:20,488 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 36.48 sec
+2023-02-15 07:35:21,500 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 36.48 sec
+MapReduce Total cumulative CPU time: 36 seconds 480 msec
+Ended Job = job_202302150438_0003
+Loading data to table default.rating_buckets
+rmr: DEPRECATED: Please use 'rm -r' instead.
+Deleted /user/hive/warehouse/rating_buckets
+100000 Rows loaded to rating_buckets
+MapReduce Jobs Launched: 
+Job 0: Map: 1  Reduce: 8   Cumulative CPU: 36.48 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 36 seconds 480 msec
+OK
+Time taken: 34.313 seconds
+hive> select count(*) from rating_buckets
+    > tablesample(bucket 3 out of 8);
+Total MapReduce jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_202302150438_0004, Tracking URL = http://0.0.0.0:50030/jobdetails.jsp?jobid=job_202302150438_0004
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -Dmapred.job.tracker=0.0.0.0:8021 -kill job_202302150438_0004
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2023-02-15 07:39:41,542 Stage-1 map = 0%,  reduce = 0%
+2023-02-15 07:39:44,570 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.09 sec
+2023-02-15 07:39:45,581 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.09 sec
+2023-02-15 07:39:46,593 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.09 sec
+2023-02-15 07:39:47,604 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.09 sec
+2023-02-15 07:39:48,614 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.75 sec
+2023-02-15 07:39:49,629 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.75 sec
+2023-02-15 07:39:50,640 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.75 sec
+2023-02-15 07:39:51,652 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 4.75 sec
+MapReduce Total cumulative CPU time: 4 seconds 750 msec
+Ended Job = job_202302150438_0004
+MapReduce Jobs Launched: 
+Job 0: Map: 1  Reduce: 1   Cumulative CPU: 4.75 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 4 seconds 750 msec
+OK
+12527
+
+
+
+
+
+
+
+
+
+[training@localhost ~]$ cd hiveWorkspace
+[training@localhost hiveWorkspace]$ hadoop fs -ls /user/hive/warehouse/default.db/rating_buckets
+ls: `/user/hive/warehouse/default.db/rating_buckets': No such file or directory
+[training@localhost hiveWorkspace]$ hadoop fs -ls /user/hive/warehouse/
+Found 8 items
+drwxr-xr-x   - training supergroup          0 2023-02-15 06:27 /user/hive/warehouse/movies_part
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:53 /user/hive/warehouse/part
+drwxr-xr-x   - training supergroup          0 2023-02-15 07:35 /user/hive/warehouse/rating_buckets
+drwxr-xr-x   - training supergroup          0 2023-02-15 04:50 /user/hive/warehouse/states
+drwxr-xr-x   - training supergroup          0 2023-02-15 05:14 /user/hive/warehouse/tab12
+drwxr-xr-x   - training supergroup          0 2023-02-15 05:18 /user/hive/warehouse/tab12_bucket
+drwxr-xr-x   - training supergroup          0 2023-02-15 06:54 /user/hive/warehouse/userdb.db
+drwxr-xr-x   - training supergroup          0 2023-02-14 06:58 /user/hive/warehouse/userratings
+[training@localhost hiveWorkspace]$ hadoop fs -ls /user/hive/warehouse/rating_buckets
+Found 8 items
+-rw-r--r--   1 training supergroup     229924 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000000_0
+-rw-r--r--   1 training supergroup     250253 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000001_0
+-rw-r--r--   1 training supergroup     247620 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000002_0
+-rw-r--r--   1 training supergroup     240129 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000003_0
+-rw-r--r--   1 training supergroup     266397 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000004_0
+-rw-r--r--   1 training supergroup     232873 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000005_0
+-rw-r--r--   1 training supergroup     242315 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000006_0
+-rw-r--r--   1 training supergroup     269662 2023-02-15 07:35 /user/hive/warehouse/rating_buckets/000007_0
+[training@localhost hiveWorkspace]$ 
+
+
